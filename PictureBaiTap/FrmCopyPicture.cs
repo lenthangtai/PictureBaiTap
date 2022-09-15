@@ -39,7 +39,7 @@ namespace PictureBaiTap
         }
         private void btnInputPath_Click(object sender, EventArgs e)
         {
-            try
+           try
             {
                 fd.ShowDialog();
                 //lọc chọn ra file ảnh từ folder đc chọn
@@ -84,11 +84,13 @@ namespace PictureBaiTap
 
         private void txtSave_KeyDown(object sender, KeyEventArgs e)
         {
+           //khi focus ở ô txtsave và ấn enter, sẽ save bức ảnh được show ra ở trong list được lưu, in ra filename = "index_txtSave.Text".
             if (e.KeyCode == Keys.Enter)
             {
                 HamInGiaTriIndex();
                 //ImageView.Image.Save(fd.SelectedPath + "\\" + "result\\" + (counter + 1).ToString().PadLeft(6, '0') + "_" + txtSave.Text.Trim() + ".jpg")
                 counter += 1;
+                //nếu số lương file chạy đã chạy bằng tổng giá trị file đếm được thì hiển thị mesagebox.show ghi hoàn thành và đóng lại form
                 if (counter == locFile.Count)
                 {
                     MessageBox.Show("Complete!");
@@ -128,7 +130,7 @@ namespace PictureBaiTap
                             }
                             else
                             {
-                                //Ở đây counter ở trên đã + 1 rồi nên khi ở hàm delete phải - 1 để tính lại cái ảnh trước khi đã chuyển đi
+                                 //Ở đây counter ở trên đã + 1 khi ấn nút delete là đã chuyển ảnh rồi nên khi ở hàm delete ta muốn xóa cái ảnh vừa chuyển thì phải - 1 để tính lại cái ảnh trước khi đã chuyển đi
                                 ImageView.Image.Dispose();
                                 File.Delete(locFile[counter - 1]);
                                 HienAnh();
