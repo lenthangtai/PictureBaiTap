@@ -144,10 +144,10 @@
             this.ClientSize = new System.Drawing.Size(442, 628);
             this.Controls.Add(this.pnlHeader);
             this.Controls.Add(this.panel1);
+            this.HelpButton = true;
             this.KeyPreview = true;
             this.Name = "FrmCopyPicture";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmCopyPicture_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FrmCopyPicture_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.ImageView)).EndInit();
             this.pnlHeader.ResumeLayout(false);

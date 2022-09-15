@@ -27,37 +27,53 @@ namespace PictureBaiTap
         FolderBrowserDialog fd = new FolderBrowserDialog();
         string[] filterFile = { "*.png", "*.jpg", "*.gif" };
         int counter = 0;
+
         public void HienAnh()
         {
-            ImageView.Image = Image.FromFile(locFile[counter]);
-            lblCount.Text = Convert.ToInt32(counter + 1) + "/" + locFile.Count.ToString();
-            txtSave.Clear();
+            FileResult = Directory.GetFiles(fd.SelectedPath + "\\" + "result", "*.jpg", SearchOption.TopDirectoryOnly).ToList();
+            int counterResult = FileResult.Count();
+            if (counterResult != 0)
+            {
+                int countern = FileResult.Count();
+                ImageView.Image = Image.FromFile(locFile[countern]);
+                //show giá trị index trong list / tổng giá trị index đếm được trong folder
+                lblCount.Text = Convert.ToInt32(counterResult + 1) + "/" + locFile.Count.ToString();
+                txtSave.Clear();
+            }
+            else if (counterResult == 0)
+            {
+                ImageView.Image = Image.FromFile(locFile[counter]);
+                //show giá trị index trong list / tổng giá trị index đếm được trong folder
+                lblCount.Text = Convert.ToInt32(counter + 1) + "/" + locFile.Count.ToString();
+                txtSave.Clear();
+            }
         }
-
-        Image Zoom(Image img, Size size)
-        {
-            Bitmap bmp = new Bitmap(img, img.Width + (img.Width * size.Width / 100), img.Height + (img.Height * size.Height / 100));
-            Graphics g = Graphics.FromImage(bmp);
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            return bmp;
-        }
-
         private void btnInputPath_Click(object sender, EventArgs e)
         {
             try
             {
                 fd.ShowDialog();
-                locFile = filterFile.SelectMany(file => Directory.GetFiles(fd.SelectedPath, file)).ToList();
+                //lọc chọn ra file ảnh từ folder đc chọn
+                locFile = Directory.GetFiles(fd.SelectedPath, "*.jpg", SearchOption.TopDirectoryOnly).ToList();
                 if (locFile.Count() == 0)
                 {
                     MessageBox.Show("This Folder Don't Have A Picture!!!\nPlease, Pick Folder Another.", "Alert Title", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    HienAnh();
+                    //
+                    //sau khi hiện ảnh focus thằng ảnh vị trí txtSave
                     txtSave.Focus();
                     DirectoryInfo dir = new DirectoryInfo(fd.SelectedPath + "\\" + "result");
-                    if (dir.Exists) { } else { dir.Create(); }
+                    //kiểm tra có folder result trong folder dược chọn không, không có tạo, có rồi thì thôi 
+                    if (!dir.Exists)
+                    {
+                        dir.Create();
+                    }
+                    else
+                    {
+                        HienAnh();
+                    }
                 }
             }
             catch (Exception ex)
@@ -65,84 +81,73 @@ namespace PictureBaiTap
                 MessageBox.Show(ex.Message);
             }
         }
-        public void CheckCount()
-        {
-            //câu này là search vào thằng ổ file result sau đó kiếm đếm số lượng file png jpg trong folder result
-            FileResult = filterFile.SelectMany(file => Directory.GetFiles(fd.SelectedPath + "\\" + "result", file)).ToList();
-            int counterResult = FileResult.Count();
-            //so sánh nếu trong ổ đĩa index có giá tri = 0, thì sẽ bắt đầu in từ giá trị đầu tiên + 1
-            if (counterResult == 0)
-            {
-                ImageView.Image.Save(fd.SelectedPath + "\\" + "result\\" + (counter + 1).ToString().PadLeft(6, '0') + "_" + txtSave.Text.Trim() + ".jpg");
-            }
-            //ngược lại thì sẽ tiếp tục giá trị index cao nhất sau đó + 1 thêm để bỏ vào giá trị index hiện tại.
-            else
-            {
-                int maxCount = (int)counterResult;
-                ImageView.Image.Save(fd.SelectedPath + "\\" + "result\\" + (maxCount + 1).ToString().PadLeft(6, '0') + "_" + txtSave.Text.Trim() + ".jpg");
-            }
-        }
 
         private void txtSave_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
+            try
             {
-                CheckCount();
-                //ImageView.Image.Save(fd.SelectedPath + "\\" + "result\\" + (counter + 1).ToString().PadLeft(6, '0') + "_" + txtSave.Text.Trim() + ".jpg")
-                counter += 1;
-                if (counter == locFile.Count)
+                //khi focus ở ô txtsave và ấn enter, sẽ save bức ảnh được show ra ở trong list được lưu, in ra filename = "index_txtSave.Text".
+                if (e.KeyCode == Keys.Enter)
                 {
-                    MessageBox.Show("Complete!");
-                    this.Close();
-                    return;
-                }
-                else
-                {
-                    HienAnh();
+                    int counterResult = FileResult.Count();
+                    if (counterResult == 0)
+                    {
+                        ImageView.Image.Save(fd.SelectedPath + "\\" + "result\\" + (counter + 1).ToString().PadLeft(6, '0') + "_" + txtSave.Text.Trim() + ".jpg");
+                    }
+                    else
+                    {
+                        ImageView.Image.Save(fd.SelectedPath + "\\" + "result\\" + (counterResult + 1).ToString().PadLeft(6, '0') + "_" + txtSave.Text.Trim() + ".jpg");
+                    }
+                    //ImageView.Image.Save(fd.SelectedPath + "\\" + "result\\" + (counter + 1).ToString().PadLeft(6, '0') + "_" + txtSave.Text.Trim() + ".jpg");
+                    counter += 1; counterResult += 1;
+                    //nếu số lương file chạy đã chạy bằng tổng giá trị file đếm được thì hiển thị mesagebox.show ghi hoàn thành và đóng lại form
+                    if (counter == locFile.Count || counterResult == locFile.Count)
+                    {
+                        MessageBox.Show("Complete!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.Close();
+                        return;
+                    }
+                    else
+                    {
+                        HienAnh();
+                    }
                 }
             }
+            catch (Exception ex)
+            { MessageBox.Show(ex.Message); }
         }
-        //protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        //{
-
-        //    return base.ProcessCmdKey(ref msg, keyData);
-        //}
-        private void FrmCopyPicture_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (MessageBox.Show("Bạn có thật sự muốn thoát chương trình?", "Thông báo", MessageBoxButtons.OKCancel) != System.Windows.Forms.DialogResult.OK)
-            {
-                e.Cancel = true;
-            }
-        }
-
         private void FrmCopyPicture_KeyDown(object sender, KeyEventArgs e)
         {
             try
             {
                 switch (e.KeyData)
                 {
+                    case Keys.F1:
+                        FrmThongTin frm = new FrmThongTin();
+                        this.Hide();
+                        frm.ShowDialog();
+                        this.Show();
+                        break;
+
                     case Keys.Escape:
-                        Application.Exit();
+                        DialogResult dg = MessageBox.Show("Bạn muốn thoát hệ thống.!", "Thông báo", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                        if(dg == DialogResult.OK)
+                        {
+                            this.Close();
+                        }
                         break;
                     case Keys.Delete:
-                        try
+                        counter += 1;
+                        if (counter == locFile.Count)
                         {
-                            counter += 1;
-                            if (counter == locFile.Count)
-                            {
-
-                                return;
-                            }
-                            else
-                            {
-                                ImageView.Image.Dispose();
-                                File.Delete(locFile[counter - 1]);
-                                HienAnh();
-                            }
+                            return;
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            MessageBox.Show(ex.Message);
+                            //Ở đây counter ở trên đã + 1 khi ấn nút delete là đã chuyển ảnh rồi nên khi ở hàm delete ta muốn xóa cái ảnh vừa chuyển thì phải - 1 để tính lại cái ảnh trước khi đã chuyển đi
+                            ImageView.Image.Dispose();
+                            File.Delete(locFile[counter - 1]);
+                            HienAnh();
                         }
                         break;
                 }
@@ -150,7 +155,6 @@ namespace PictureBaiTap
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-
             }
         }
     }
